@@ -63,6 +63,7 @@ public:
 
     QPoint center;
     double zoom;
+    bool showCtlPoints;
 
 public slots:
     void setAntialiased(bool antialiased);
@@ -72,6 +73,7 @@ protected:
 private:
     bool antialiased;
     QPainterPath path;
+    QPolygonF points;
 
 };
 

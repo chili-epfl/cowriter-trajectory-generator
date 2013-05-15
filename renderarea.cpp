@@ -56,6 +56,7 @@ RenderArea::RenderArea(QWidget *parent)
     zoom = 1.0;
     center.setX(width() / 2);
     center.setY(height() / 2);
+    showCtlPoints = false;
 }
 
 QSize RenderArea::minimumSizeHint() const
@@ -70,11 +71,16 @@ QSize RenderArea::sizeHint() const
 
 void RenderArea::preparePath(const bezierpath &bpath)
 {
-    path.moveTo(bpath.origin.x, bpath.origin.y);
+    float ox = bpath.origin.x;
+    float oy = bpath.origin.y;
+    path.moveTo(ox, oy);
+    points << QPointF(ox, oy);
+
     for (auto curve : bpath.curves) {
-        path.cubicTo(curve.c1x, curve.c1y,
-                     curve.c2x, curve.c2y,
-                     curve.x, curve.y);
+        path.cubicTo(curve.c1x + ox, curve.c1y + oy,
+                     curve.c2x + ox, curve.c2y + oy,
+                     curve.x + ox, curve.y + oy);
+        points << QPointF(curve.x + ox, curve.y + oy);
     }
 
 }
@@ -86,15 +92,13 @@ void RenderArea::setAntialiased(bool antialiased)
     update();
 }
 
+//void RenderArea::drawGrid(const QPainter& painter) {
+//
+//}
+
+
 void RenderArea::paintEvent(QPaintEvent * /* event */)
 {
-    static const QPoint points[4] = {
-        QPoint(10, 80),
-        QPoint(20, 10),
-        QPoint(80, 30),
-        QPoint(90, 70)
-    };
-
     QPainter painter(this);
     painter.setPen(QPen(Qt::blue, 2, Qt::DashLine, Qt::RoundCap, Qt::MiterJoin));
     painter.setBrush(Qt::NoBrush);
@@ -105,6 +109,14 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
     painter.translate(center);
     painter.scale(zoom, zoom);
     painter.drawPath(path);
+
+    if (showCtlPoints) {
+        painter.save();
+        painter.setPen(QPen(Qt::red, 4, Qt::DashLine, Qt::RoundCap, Qt::MiterJoin));
+        painter.drawPoints(points);
+        painter.restore();
+    }
+
     painter.restore();
 
     painter.setRenderHint(QPainter::Antialiasing, false);

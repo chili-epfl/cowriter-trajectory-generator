@@ -28,6 +28,8 @@ private slots:
 
     void on_actionQuit_triggered();
 
+    void on_showCtlPoints_stateChanged(int arg1);
+
 private:
     RenderArea *renderArea;
     SvgPathParser svgPathParser;

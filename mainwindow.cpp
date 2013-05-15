@@ -91,3 +91,9 @@ void MainWindow::mouseMoveEvent(QMouseEvent *evt)
     renderArea->center = evt->pos() - initialDragPos;
     renderArea->update();
 }
+
+void MainWindow::on_showCtlPoints_stateChanged(int arg1)
+{
+   renderArea->showCtlPoints ? renderArea->showCtlPoints = false : renderArea->showCtlPoints = true;
+    renderArea->update();
+}
