@@ -30,11 +30,14 @@ private slots:
 
     void on_showCtlPoints_stateChanged(int arg1);
 
-    void on_showTraj_stateChanged(int arg1);
 
     void on_showSvg_stateChanged(int arg1);
 
     void on_trajDensity_valueChanged(int value);
+
+    void on_groupBox_toggled(bool arg1);
+
+    void on_pushButton_clicked();
 
 private:
     RenderArea *renderArea;
@@ -46,6 +49,7 @@ private:
 
     QPoint initialDragPos;
 
+    void displayMousePosition(const QPoint& pos);
     void mousePressEvent(QMouseEvent *);
     void mouseMoveEvent(QMouseEvent *);
 };

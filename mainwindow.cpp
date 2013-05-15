@@ -88,6 +88,14 @@ void MainWindow::mouseMoveEvent(QMouseEvent *evt)
 {
     renderArea->center = evt->pos() - initialDragPos;
     renderArea->update();
+    displayMousePosition(evt->pos());
+}
+
+void MainWindow::displayMousePosition(const QPoint &pos) {
+    //TODO: compute correctly the coordinates of the mouse in the path coordinate space
+    //float x = (pos.x() + renderArea->center.x()) * renderArea->zoom;
+    //float y = (pos.y() + renderArea->center.y()) * renderArea->zoom;
+    //statusBar()->showMessage(QString::number(x) + ", " + QString::number(y) , 2000);
 }
 
 void MainWindow::on_showCtlPoints_stateChanged(int arg1)
@@ -96,7 +104,7 @@ void MainWindow::on_showCtlPoints_stateChanged(int arg1)
     renderArea->update();
 }
 
-void MainWindow::on_showTraj_stateChanged(int arg1)
+void MainWindow::on_groupBox_toggled(bool arg1)
 {
    if (!renderArea->showTrajPoints) {
         auto sampler = TrajSampler(svgPathParser.path);
@@ -128,3 +136,13 @@ void MainWindow::on_trajDensity_valueChanged(int value)
     renderArea->setTrajPoints(traj);
     renderArea->update();
  }
+
+
+void MainWindow::on_pushButton_clicked()
+{
+    auto sampler = TrajSampler(svgPathParser.path);
+    auto traj = sampler.sample(density);
+    for (auto p : traj) {
+        cout << p.x << "," << p.y << endl;
+    }
+}
