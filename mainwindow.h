@@ -30,9 +30,17 @@ private slots:
 
     void on_showCtlPoints_stateChanged(int arg1);
 
+    void on_showTraj_stateChanged(int arg1);
+
+    void on_showSvg_stateChanged(int arg1);
+
+    void on_trajDensity_valueChanged(int value);
+
 private:
     RenderArea *renderArea;
     SvgPathParser svgPathParser;
+    int density; // density of points when generating trajectory -> nb of points generated per cubic spline
+
     Ui::MainWindow *ui;
     void wheelEvent(QWheelEvent *evt);
 

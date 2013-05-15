@@ -41,6 +41,8 @@
 #ifndef RENDERAREA_H
 #define RENDERAREA_H
 
+#include <vector>
+
 #include <QBrush>
 #include <QPen>
 #include <QPixmap>
@@ -59,11 +61,13 @@ public:
     QSize sizeHint() const;
 
     void preparePath(const bezierpath& bpath);
-
+    void setTrajPoints(const std::vector<point>& points);
 
     QPoint center;
     double zoom;
     bool showCtlPoints;
+    bool showTrajPoints;
+    bool showSvg;
 
 public slots:
     void setAntialiased(bool antialiased);
@@ -73,8 +77,10 @@ protected:
 private:
     bool antialiased;
     QPainterPath path;
+    QPolygonF ctlPoints;
     QPolygonF points;
 
+    void drawGrid(QPainter &painter);
 };
 
 #endif

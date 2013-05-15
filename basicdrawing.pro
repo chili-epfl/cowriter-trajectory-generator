@@ -1,10 +1,13 @@
 HEADERS       = renderarea.h \
     svgpathparser.h \
-    mainwindow.h
+    mainwindow.h \
+    trajsampler.h
 SOURCES       = main.cpp \
                 renderarea.cpp \
     svgpathparser.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    bezierpath.cpp \
+    trajsampler.cpp
 RESOURCES     = basicdrawing.qrc
 QT           += xml
 QMAKE_CXXFLAGS += -std=c++11

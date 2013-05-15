@@ -51,7 +51,7 @@
        <x>0</x>
        <y>0</y>
        <width>146</width>
-       <height>65</height>
+       <height>140</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
@@ -62,9 +62,26 @@
        <enum>QLayout::SetDefaultConstraint</enum>
       </property>
       <item>
+       <widget class="QCheckBox" name="showSvg">
+        <property name="text">
+         <string>Original path</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="showCtlPoints">
         <property name="text">
          <string>Control points</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="showTraj">
+        <property name="text">
+         <string>Trajectory</string>
         </property>
        </widget>
       </item>
@@ -76,9 +93,19 @@
        </widget>
       </item>
       <item>
-       <widget class="QSlider" name="horizontalSlider">
+       <widget class="QSlider" name="trajDensity">
+        <property name="value">
+         <number>5</number>
+        </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="nbPoints">
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>

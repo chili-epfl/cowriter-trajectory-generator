@@ -4,7 +4,7 @@
 #include <QtGui>
 
 #include "renderarea.h"
-
+#include  "trajsampler.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     renderArea = new RenderArea;
     setCentralWidget(renderArea);
+
+    density = 5;
 }
 
 MainWindow::~MainWindow()
@@ -48,10 +50,6 @@ void MainWindow::open()
 
          if (svgPathParser.read(&file)) {
              statusBar()->showMessage(tr("File loaded"), 2000);
-             cout << "Points:" << endl;
-             for (auto curve : svgPathParser.path.curves) {
-                cout << "(x,y)->(" << curve.x << ", " << curve.y << ")" << endl;
-             }
          }
 }
 
@@ -97,3 +95,36 @@ void MainWindow::on_showCtlPoints_stateChanged(int arg1)
    renderArea->showCtlPoints ? renderArea->showCtlPoints = false : renderArea->showCtlPoints = true;
     renderArea->update();
 }
+
+void MainWindow::on_showTraj_stateChanged(int arg1)
+{
+   if (!renderArea->showTrajPoints) {
+        auto sampler = TrajSampler(svgPathParser.path);
+        auto traj = sampler.sample(density);
+        findChild<QLabel *>("nbPoints")->setText(QString::number(traj.size()) + " points");
+        renderArea->setTrajPoints(traj);
+       renderArea->showTrajPoints = true;
+    renderArea->update();
+   }
+    else {
+       renderArea->showTrajPoints = false;
+        findChild<QLabel *>("nbPoints")->setText("");
+            renderArea->update();
+   }
+}
+
+void MainWindow::on_showSvg_stateChanged(int arg1)
+{
+   renderArea->showSvg ? renderArea->showSvg = false : renderArea->showSvg = true;
+    renderArea->update();
+}
+
+void MainWindow::on_trajDensity_valueChanged(int value)
+{
+    density = value;
+    auto sampler = TrajSampler(svgPathParser.path);
+    auto traj = sampler.sample(density);
+    findChild<QLabel *>("nbPoints")->setText(QString::number(traj.size()) + " points");
+    renderArea->setTrajPoints(traj);
+    renderArea->update();
+ }

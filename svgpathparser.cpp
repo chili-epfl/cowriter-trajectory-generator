@@ -60,6 +60,8 @@ bool SvgPathParser::parsePath(std::string &content)
          back_inserter<vector<string> >(tokens));
 
 
+    point prev_point;
+    prev_point.x = prev_point.y = 0;
     for (int i = 0; i < tokens.size() ; i++) {
         auto tok = tokens[i];
         if(tok.size() == 1) {// command
@@ -73,12 +75,14 @@ bool SvgPathParser::parsePath(std::string &content)
                 point c2 = splitToken(tokens[i+2]);
                 point p = splitToken(tokens[i+3]);
 
+                curve.ox = prev_point.x;
+                curve.oy = prev_point.y;
                 curve.c1x = c1.x - path.origin.x;
                 curve.c1y = c1.y - path.origin.y;
                 curve.c2x = c2.x - path.origin.x;
                 curve.c2y = c2.y - path.origin.y;
-                curve.x = p.x - path.origin.x;
-                curve.y = p.y - path.origin.y;
+                curve.x = prev_point.x = p.x - path.origin.x;
+                curve.y = prev_point.y = p.y - path.origin.y;
 
                 path.curves.push_back(curve);
 
