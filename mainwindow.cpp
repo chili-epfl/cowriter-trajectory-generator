@@ -1,4 +1,6 @@
 #include <iostream>
+#include <algorithm>    // std::max
+
 #include <QtGui>
 
 #include "renderarea.h"
@@ -68,5 +70,24 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_actionQuit_triggered()
 {
-   close();
+    close();
+}
+
+void MainWindow::wheelEvent(QWheelEvent *evt)
+{
+    auto step = (evt->delta() / 8) / 15; // nb of steps. Cf http://harmattan-dev.nokia.com/docs/library/html/qt4/qwheelevent.html#delta
+    renderArea->zoom += step / 10.0;
+    renderArea->zoom = max(renderArea->zoom, 0.1);
+    renderArea->update();
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *evt)
+{
+    initialDragPos = evt->pos() - renderArea->center;
+}
+
+void MainWindow::mouseMoveEvent(QMouseEvent *evt)
+{
+    renderArea->center = evt->pos() - initialDragPos;
+    renderArea->update();
 }

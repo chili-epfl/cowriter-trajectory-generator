@@ -37,20 +37,25 @@
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
+#include <iostream>
 
 #include <QtGui>
 
 #include "renderarea.h"
 
+using namespace std;
+
 RenderArea::RenderArea(QWidget *parent)
     : QWidget(parent)
 {
     antialiased = true;
-    transformed = false;
-    pixmap.load(":/images/qt-logo.png");
 
     setBackgroundRole(QPalette::Base);
     setAutoFillBackground(true);
+
+    zoom = 1.0;
+    center.setX(width() / 2);
+    center.setY(height() / 2);
 }
 
 QSize RenderArea::minimumSizeHint() const
@@ -81,12 +86,6 @@ void RenderArea::setAntialiased(bool antialiased)
     update();
 }
 
-void RenderArea::setTransformed(bool transformed)
-{
-    this->transformed = transformed;
-    update();
-}
-
 void RenderArea::paintEvent(QPaintEvent * /* event */)
 {
     static const QPoint points[4] = {
@@ -103,12 +102,8 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
         painter.setRenderHint(QPainter::Antialiasing, true);
 
     painter.save();
-    if (transformed) {
-        painter.translate(50, 50);
-        painter.rotate(60.0);
-        painter.scale(0.6, 0.9);
-        painter.translate(-50, -50);
-    }
+    painter.translate(center);
+    painter.scale(zoom, zoom);
     painter.drawPath(path);
     painter.restore();
 
@@ -117,4 +112,3 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
     painter.setBrush(Qt::NoBrush);
     painter.drawRect(QRect(0, 0, width() - 1, height() - 1));
 }
-//! [13]

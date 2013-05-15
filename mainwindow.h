@@ -32,6 +32,12 @@ private:
     RenderArea *renderArea;
     SvgPathParser svgPathParser;
     Ui::MainWindow *ui;
+    void wheelEvent(QWheelEvent *evt);
+
+    QPoint initialDragPos;
+
+    void mousePressEvent(QMouseEvent *);
+    void mouseMoveEvent(QMouseEvent *);
 };
 
 #endif // MAINWINDOW_H

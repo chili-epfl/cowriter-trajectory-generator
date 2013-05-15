@@ -47,7 +47,6 @@
 #include <QWidget>
 
 #include "bezierpath.h"
-//! [0]
 class RenderArea : public QWidget
 {
     Q_OBJECT
@@ -61,19 +60,19 @@ public:
 
     void preparePath(const bezierpath& bpath);
 
+
+    QPoint center;
+    double zoom;
+
 public slots:
     void setAntialiased(bool antialiased);
-    void setTransformed(bool transformed);
-
 protected:
     void paintEvent(QPaintEvent *event);
 
 private:
     bool antialiased;
-    bool transformed;
-    QPixmap pixmap;
     QPainterPath path;
+
 };
-//! [0]
 
 #endif
