@@ -1,5 +1,5 @@
 
-#include <math.h>       /* pow, sqrt */
+#include <math.h>       /* pow, sqrt, fabs */
 
 #include "bezierpath.h"
 
@@ -9,15 +9,37 @@ point BezierCubicPatch::pointAt(float t) const
     point p;
 
     //cf http://en.wikipedia.org/wiki/B%C3%A9zier_curve
-    p.x = pow(1 - t, 3) * ox
-          + 3 * pow(1 - t, 2) * t * c1x
-          + 3 * pow(t, 2) * (1 - t) * c2x
-          + pow(t, 3) * x;
-    p.y = pow(1 - t, 3) * oy
-          + 3 * pow(1 - t, 2) * t * c1y
-          + 3 * pow(t, 2) * (1 - t) * c2y
-          + pow(t, 3) * y;
+    p.x = pos(t, ox, c1x, c2x, x);
+    p.y = pos(t, oy, c1y, c2y, y);
     return p;
+}
+
+float BezierCubicPatch::pos(float t, float a, float b, float c, float d) const
+{
+        return pow(1 - t, 3) * a
+            + 3 * pow(1 - t, 2) * t * b
+            + 3 * pow(t, 2) * (1 - t) * c
+            + pow(t, 3) * d;
+}
+
+float BezierCubicPatch::derivate(float t, float a, float b, float c, float d) const
+{
+        // output of WolphramAlpha
+        return -3 * (
+                    a * pow(-1 + t,2)
+                    + b * (-1 + 4 * t - 3 * pow(t,2))
+                        + t * (-2 * c + 3 * c * t - d * t)
+                );
+}
+float BezierCubicPatch::sec_derivate(float t, float a, float b, float c, float d) const
+{
+        // output of WolphramAlpha
+        return -6 * (
+                    a * (-1 + t)
+                    + b * (2 - 3 * t)
+                    + 3 * c * t
+                        - c - d * t
+                );
 }
 
 float BezierCubicPatch::length(float error) const
@@ -25,6 +47,17 @@ float BezierCubicPatch::length(float error) const
     float len;
     addifclose(&len, error);
     return len;
+}
+
+float BezierCubicPatch::curvatureAt(float t) const
+{
+    // https://en.wikipedia.org/wiki/Curvature#Curvature_of_plane_curves
+    float xprime = derivate(t, ox, c1x, c2x, x);
+    float xprimeprime = sec_derivate(t, ox, c1x, c2x, x);
+    float yprime = derivate(t, oy, c1y, c2y, y);
+    float yprimeprime = sec_derivate(t, oy, c1y, c2y, y);
+
+    return fabs(xprime * yprimeprime - yprime * xprimeprime) / pow(xprime * xprime + yprime * yprime, 1.5);
 }
 
 void BezierCubicPatch::split(BezierCubicPatch *left, BezierCubicPatch *right) const

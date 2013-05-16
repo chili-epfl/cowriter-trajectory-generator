@@ -1,3 +1,5 @@
+#include<iostream>
+
 #include "trajsampler.h"
 
 using namespace std;
@@ -8,6 +10,8 @@ TrajSampler::TrajSampler(const BezierPath &path) : bpath(path)
 
 vector<point> TrajSampler::sample(int density)
 {
+    curvatures.clear();
+
     vector<point> points;
 
     for (auto curve : bpath.curves) {
@@ -16,6 +20,7 @@ vector<point> TrajSampler::sample(int density)
             p.x += bpath.origin.x;
             p.y += bpath.origin.y;
             points.push_back(p);
+            curvatures.push_back(curve.curvatureAt(t));
         }
     }
 

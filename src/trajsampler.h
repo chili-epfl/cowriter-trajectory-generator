@@ -12,6 +12,8 @@ public:
 
     std::vector<point> sample(int density);
 
+    std::vector<float> curvatures;
+
 private:
     const BezierPath& bpath;
 };

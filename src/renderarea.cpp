@@ -89,11 +89,14 @@ void RenderArea::preparePath(const BezierPath &bpath)
 
 }
 
-void RenderArea::setTrajPoints(const vector<point> &bpoints)
+void RenderArea::setTrajPoints(const vector<pair<point, float> > &bpoints)
 {
     points.clear();
+    pointsColors.clear();
     for (auto p : bpoints) {
-        points << QPointF(p.x, p.y);
+        points << QPointF(p.first.x, p.first.y);
+
+        pointsColors.push_back(QColor::fromRgbF(p.second,0,0,1.0));
 
     }
 }
@@ -131,6 +134,14 @@ void RenderArea::drawGrid(QPainter& painter) {
     painter.restore();
 }
 
+void RenderArea::drawTraj(QPainter &painter)
+{
+    for (int i = 0; i < points.size(); i++) {
+        painter.setPen(QPen(pointsColors[i], 2, Qt::SolidLine, Qt::RoundCap));
+        painter.drawPoint(points[i]);
+    }
+}
+
 
 void RenderArea::paintEvent(QPaintEvent * /* event */)
 {
@@ -154,8 +165,7 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
     }
 
     if (showTrajPoints) {
-        painter.setPen(QPen(Qt::black, 2, Qt::DashLine, Qt::RoundCap, Qt::MiterJoin));
-        painter.drawPoints(points);
+        drawTraj(painter);
     }
 
 

@@ -23,10 +23,16 @@ struct BezierCubicPatch {
     */
     float length(float error = 1.0) const;
 
+    float curvatureAt(float t) const;
+
 
 private:
     void split(BezierCubicPatch* left, BezierCubicPatch* right) const;
     void addifclose(float* length, float error) const;
+
+    float pos(float t, float a, float b, float c, float d) const;
+    float derivate(float t, float a, float b, float c, float d) const;
+    float sec_derivate(float t, float a, float b, float c, float d) const;
 };
 
 struct BezierPath {

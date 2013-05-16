@@ -42,6 +42,7 @@
 #define RENDERAREA_H
 
 #include <vector>
+#include <utility> // std::pair
 
 #include <QBrush>
 #include <QPen>
@@ -61,7 +62,9 @@ public:
     QSize sizeHint() const;
 
     void preparePath(const BezierPath& bpath);
-    void setTrajPoints(const std::vector<point>& points);
+
+    // takes a list of 2D points with an associated 'strength' used for displaying stuff like curvature
+    void setTrajPoints(const std::vector<std::pair<point, float> > &points);
 
     QPoint center;
     double zoom;
@@ -79,8 +82,10 @@ private:
     QPainterPath path;
     QPolygonF ctlPoints;
     QPolygonF points;
+    std::vector<QColor> pointsColors;
 
     void drawGrid(QPainter &painter);
+    void drawTraj(QPainter &painter);
 };
 
 #endif

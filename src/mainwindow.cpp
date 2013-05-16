@@ -105,15 +105,33 @@ void MainWindow::on_showCtlPoints_stateChanged(int arg1)
     renderArea->update();
 }
 
+int MainWindow::setTrajPoints(const BezierPath &bpath)
+{
+
+    auto sampler = TrajSampler(bpath);
+    auto path = sampler.sample(density);
+
+    vector<pair<point, float> > traj;
+    for (int i = 0; i < path.size(); i++) {
+        float normalizedCurvature = fmin(1.0, fmax(0.0, sampler.curvatures[i] * 10));
+        pair<point, float> elem(path[i], normalizedCurvature);
+        traj.push_back(elem);
+    }
+
+    renderArea->setTrajPoints(traj);
+
+    return path.size();
+
+}
+
+
 void MainWindow::on_groupBox_toggled(bool arg1)
 {
    if (!renderArea->showTrajPoints) {
-        auto sampler = TrajSampler(svgPathParser.path);
-        auto traj = sampler.sample(density);
-        findChild<QLabel *>("nbPoints")->setText(QString::number(traj.size()) + " points");
-        renderArea->setTrajPoints(traj);
-       renderArea->showTrajPoints = true;
-    renderArea->update();
+        int len = setTrajPoints(svgPathParser.path);
+        findChild<QLabel *>("nbPoints")->setText(QString::number(len) + " points");
+        renderArea->showTrajPoints = true;
+        renderArea->update();
    }
     else {
        renderArea->showTrajPoints = false;
@@ -138,10 +156,8 @@ void MainWindow::on_showSvg_stateChanged(int arg1)
 void MainWindow::on_trajDensity_valueChanged(int value)
 {
     density = value;
-    auto sampler = TrajSampler(svgPathParser.path);
-    auto traj = sampler.sample(density);
-    findChild<QLabel *>("nbPoints")->setText(QString::number(traj.size()) + " points");
-    renderArea->setTrajPoints(traj);
+    int len = setTrajPoints(svgPathParser.path);
+    findChild<QLabel *>("nbPoints")->setText(QString::number(len) + " points");
     renderArea->update();
  }
 

@@ -45,11 +45,13 @@ private:
     int density; // density of points when generating trajectory -> nb of points generated per cubic spline
 
     Ui::MainWindow *ui;
-    void wheelEvent(QWheelEvent *evt);
 
     QPoint initialDragPos;
 
+    int setTrajPoints(const BezierPath &bpath);
     void displayMousePosition(const QPoint& pos);
+
+    void wheelEvent(QWheelEvent *evt);
     void mousePressEvent(QMouseEvent *);
     void mouseMoveEvent(QMouseEvent *);
 };
