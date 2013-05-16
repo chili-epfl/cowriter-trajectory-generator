@@ -4,7 +4,7 @@
 #include "bezierpath.h"
 
 #define distance(x1, y1, x2, y2) (sqrt(pow(x2-x1,2) + pow(y2-y1,2)))
-point bezier::pointAt(float t) const
+point BezierCubicPatch::pointAt(float t) const
 {
     point p;
 
@@ -20,14 +20,14 @@ point bezier::pointAt(float t) const
     return p;
 }
 
-float bezier::length(float error) const
+float BezierCubicPatch::length(float error) const
 {
     float len;
     addifclose(&len, error);
     return len;
 }
 
-void bezier::split(bezier *left, bezier *right) const
+void BezierCubicPatch::split(BezierCubicPatch *left, BezierCubicPatch *right) const
 {
     //"bezsplit" is lifted shamelessly from Schneider's Bezier curve-fitter.
     int   i, j;                               /* Index variables  */
@@ -73,9 +73,9 @@ void bezier::split(bezier *left, bezier *right) const
     right->y =  Vtemp[0][3].y;
 }
 
-void bezier::addifclose(float *length, float error) const
+void BezierCubicPatch::addifclose(float *length, float error) const
 {
-    bezier left, right;                  /* bez poly splits */
+    BezierCubicPatch left, right;                  /* bez poly splits */
 
     float len = distance(ox, oy, c1x, c1y)
         + distance(c1x, c1y, c2x, c2y)
@@ -97,7 +97,7 @@ void bezier::addifclose(float *length, float error) const
 }
 
 
-float bezierpath::length(float error) const
+float BezierPath::length(float error) const
 {
     float len = 0.0;
     for (auto c : curves) len += c.length(error);

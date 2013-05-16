@@ -71,7 +71,7 @@ QSize RenderArea::sizeHint() const
     return QSize(400, 200);
 }
 
-void RenderArea::preparePath(const bezierpath &bpath)
+void RenderArea::preparePath(const BezierPath &bpath)
 {
     path = QPainterPath(); // clear previous paths
 

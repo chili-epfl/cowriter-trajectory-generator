@@ -7,7 +7,7 @@ struct point {
     float x, y;
 };
 
-struct bezier {
+struct BezierCubicPatch {
     float ox, oy;  // origin of the Bezier curve
     float c1x, c1y; // 1st ctl point
     float c2x, c2y; // 2nd ctl point
@@ -25,13 +25,13 @@ struct bezier {
 
 
 private:
-    void split(bezier* left, bezier* right) const;
+    void split(BezierCubicPatch* left, BezierCubicPatch* right) const;
     void addifclose(float* length, float error) const;
 };
 
-struct bezierpath {
+struct BezierPath {
     point origin;
-    std::vector<bezier> curves;
+    std::vector<BezierCubicPatch> curves;
 
     float length(float error = 1.0) const;
 };

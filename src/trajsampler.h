@@ -8,12 +8,12 @@
 class TrajSampler
 {
 public:
-    TrajSampler(const bezierpath& path);
+    TrajSampler(const BezierPath& path);
 
     std::vector<point> sample(int density);
 
 private:
-    const bezierpath& bpath;
+    const BezierPath& bpath;
 };
 
 #endif // TRAJSAMPLER_H

@@ -11,7 +11,7 @@ public:
 
     bool read(QIODevice *device);
 
-    bezierpath path;
+    BezierPath path;
 
 private:
     enum mode {MOVE, RELCUBIC, ABSCUBIC};

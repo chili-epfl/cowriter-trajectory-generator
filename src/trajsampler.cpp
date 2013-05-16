@@ -2,7 +2,7 @@
 
 using namespace std;
 
-TrajSampler::TrajSampler(const bezierpath &path) : bpath(path)
+TrajSampler::TrajSampler(const BezierPath &path) : bpath(path)
 {
 }
 

@@ -93,7 +93,7 @@ bool SvgPathParser::parsePath(std::string &content)
         }
         else // coordinates
         {
-            bezier curve;
+            BezierCubicPatch curve;
             point c1, c2, p;
 
             switch(currentmode) {

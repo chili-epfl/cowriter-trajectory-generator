@@ -60,7 +60,7 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
-    void preparePath(const bezierpath& bpath);
+    void preparePath(const BezierPath& bpath);
     void setTrajPoints(const std::vector<point>& points);
 
     QPoint center;
