@@ -1,9 +1,12 @@
-
+#include <iostream>
 #include <math.h>       /* pow, sqrt, fabs */
 
 #include "bezierpath.h"
 
 #define distance(x1, y1, x2, y2) (sqrt(pow(x2-x1,2) + pow(y2-y1,2)))
+
+using namespace std;
+
 point BezierCubicPatch::pointAt(float t) const
 {
     point p;
@@ -11,6 +14,9 @@ point BezierCubicPatch::pointAt(float t) const
     //cf http://en.wikipedia.org/wiki/B%C3%A9zier_curve
     p.x = pos(t, ox, c1x, c2x, x);
     p.y = pos(t, oy, c1y, c2y, y);
+    if (p.x < -10) {
+        cout <<  "tto" << endl;
+    }
     return p;
 }
 
@@ -129,12 +135,61 @@ void BezierCubicPatch::addifclose(float *length, float error) const
     return;
 }
 
+pair<float, float> BezierCubicPatch::getParamForLength(float target, float error, float t, float width, float offset) const
+{
+    float len = length(error);
+    float delta = (offset + len) - target;
+
+    if (fabs(delta) <= error) { // found it!
+        pair<float, float> res(t, offset + len);
+        return res;
+    }
+
+    else if (delta < 0) { // outside of the curve!
+        pair<float, float> res(-1.0, len);
+        return res;
+    }
+    else {
+        BezierCubicPatch left, right;
+        split(&left,&right);
+        auto first_half = left.getParamForLength(target, error, t, width/2, offset);
+        if (first_half.first < 0) { // we are above the length of the first half
+                return right.getParamForLength(target, error, t + width/2, width/2, offset + first_half.second);
+        }
+        else return first_half;
+    }
+
+
+}
+
+
 
 float BezierPath::length(float error) const
 {
     float len = 0.0;
     for (auto c : curves) len += c.length(error);
     return len;
+}
+
+point BezierPath::pointAtDistance(float dist, float error) const
+{
+    float len = 0.0;
+    float old_len = 0.0;
+
+    for ( auto c : curves) {
+        old_len = len;
+        len += c.length();
+        if (dist <= len) {
+            auto pos = c.getParamForLength(dist - old_len, error);
+            float t = pos.first;
+            if (t < 0.) t = 1.0;
+            return c.pointAt(t);
+        }
+    }
+    // distance over path length!
+    cerr << "Unreachable distance (path length is " << len << ")!" <<endl;
+    point p; p.x = p.y = 0.;
+    return p;
 }
 
 

@@ -6,6 +6,7 @@
 class RenderArea;
 
 #include "svgpathparser.h"
+#include "trajsampler.h"
 
 namespace Ui {
 class MainWindow;
@@ -39,15 +40,19 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_samplingMethod_currentIndexChanged(const QString &arg1);
+
 private:
     RenderArea *renderArea;
     SvgPathParser svgPathParser;
+    TrajSampler* sampler;
     int density; // density of points when generating trajectory -> nb of points generated per cubic spline
 
     Ui::MainWindow *ui;
 
     QPoint initialDragPos;
 
+    int initSampler();
     int setTrajPoints(const BezierPath &bpath);
     void displayMousePosition(const QPoint& pos);
 

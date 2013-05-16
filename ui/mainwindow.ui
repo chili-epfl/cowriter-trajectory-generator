@@ -114,6 +114,27 @@
              <enum>QLayout::SetDefaultConstraint</enum>
             </property>
             <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Sampling method</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="samplingMethod">
+              <item>
+               <property name="text">
+                <string>Homogeneous</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Per patch</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="label">
               <property name="text">
                <string>Density</string>

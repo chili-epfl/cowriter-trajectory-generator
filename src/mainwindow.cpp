@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete sampler;
     delete renderArea;
     delete ui;
 
@@ -49,6 +50,7 @@ void MainWindow::open()
          }
 
          if (svgPathParser.read(&file)) {
+             sampler = new HomogenousSampler(svgPathParser.path);
              statusBar()->showMessage(tr("File loaded"), 2000);
              findChild<QLabel *>("pathLength")->setText("Length: " + QString::number(svgPathParser.path.length()));
          }
@@ -108,12 +110,11 @@ void MainWindow::on_showCtlPoints_stateChanged(int arg1)
 int MainWindow::setTrajPoints(const BezierPath &bpath)
 {
 
-    auto sampler = TrajSampler(bpath);
-    auto path = sampler.sample(density);
+    auto path = sampler->sample(density);
 
     vector<pair<point, float> > traj;
     for (int i = 0; i < path.size(); i++) {
-        float normalizedCurvature = fmin(1.0, fmax(0.0, sampler.curvatures[i] * 10));
+        float normalizedCurvature = fmin(1.0, fmax(0.0, sampler->curvatures[i] * 10));
         pair<point, float> elem(path[i], normalizedCurvature);
         traj.push_back(elem);
     }
@@ -159,14 +160,25 @@ void MainWindow::on_trajDensity_valueChanged(int value)
     int len = setTrajPoints(svgPathParser.path);
     findChild<QLabel *>("nbPoints")->setText(QString::number(len) + " points");
     renderArea->update();
- }
+}
+
 
 
 void MainWindow::on_pushButton_clicked()
 {
-    auto sampler = TrajSampler(svgPathParser.path);
-    auto traj = sampler.sample(density);
+    auto traj = sampler->sample(density);
     for (auto p : traj) {
         cout << p.x << "," << p.y << endl;
     }
+}
+
+void MainWindow::on_samplingMethod_currentIndexChanged(const QString &method)
+{
+    delete sampler;
+    if  (method == "Homogeneous") sampler = new HomogenousSampler(svgPathParser.path);
+    else sampler = new BaseSampler(svgPathParser.path);
+
+    int len = setTrajPoints(svgPathParser.path);
+    findChild<QLabel *>("nbPoints")->setText(QString::number(len) + " points");
+    renderArea->update();
 }

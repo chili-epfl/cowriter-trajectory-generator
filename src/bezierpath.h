@@ -2,6 +2,7 @@
 #define BEZIERPATH_H
 
 #include <vector>
+#include <utility> //pair
 
 struct point {
     float x, y;
@@ -25,6 +26,7 @@ struct BezierCubicPatch {
 
     float curvatureAt(float t) const;
 
+    std::pair<float, float> getParamForLength(float target, float error = 0.1, float t = 0.0, float width = 1.0, float offset = 0.0) const;
 
 private:
     void split(BezierCubicPatch* left, BezierCubicPatch* right) const;
@@ -40,6 +42,7 @@ struct BezierPath {
     std::vector<BezierCubicPatch> curves;
 
     float length(float error = 1.0) const;
+    point pointAtDistance(float distance, float error = 0.001) const;
 };
 
 #endif // BEZIERPATH_H
