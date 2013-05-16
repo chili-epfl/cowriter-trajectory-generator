@@ -73,6 +73,8 @@ QSize RenderArea::sizeHint() const
 
 void RenderArea::preparePath(const bezierpath &bpath)
 {
+    path = QPainterPath(); // clear previous paths
+
     float ox = bpath.origin.x;
     float oy = bpath.origin.y;
     path.moveTo(ox, oy);

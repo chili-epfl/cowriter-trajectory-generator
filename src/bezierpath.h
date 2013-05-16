@@ -8,18 +8,32 @@ struct point {
 };
 
 struct bezier {
-    float ox, oy;
-    float c1x, c1y;
-    float c2x, c2y;
-    float x, y;
+    float ox, oy;  // origin of the Bezier curve
+    float c1x, c1y; // 1st ctl point
+    float c2x, c2y; // 2nd ctl point
+    float x, y; // end of the bezier curve
 
-    point pointAt(float t);
+    point pointAt(float t) const;
+
+    /**
+      Algo to compute length based on Gravesen's + Hollasch impl
+      http://steve.hollasch.net/cgindex/curves/cbezarclen.html
+
+      error: acceptable length error, in path's unit
+    */
+    float length(float error = 1.0) const;
+
+
+private:
+    void split(bezier* left, bezier* right) const;
+    void addifclose(float* length, float error) const;
 };
 
 struct bezierpath {
     point origin;
     std::vector<bezier> curves;
 
+    float length(float error = 1.0) const;
 };
 
 #endif // BEZIERPATH_H

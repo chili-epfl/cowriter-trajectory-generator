@@ -50,6 +50,7 @@ void MainWindow::open()
 
          if (svgPathParser.read(&file)) {
              statusBar()->showMessage(tr("File loaded"), 2000);
+             findChild<QLabel *>("pathLength")->setText("Length: " + QString::number(svgPathParser.path.length()));
          }
 }
 
@@ -123,8 +124,15 @@ void MainWindow::on_groupBox_toggled(bool arg1)
 
 void MainWindow::on_showSvg_stateChanged(int arg1)
 {
-   renderArea->showSvg ? renderArea->showSvg = false : renderArea->showSvg = true;
-    renderArea->update();
+   if (!renderArea->showSvg) {
+        findChild<QLabel *>("pathLength")->setText("Length: " + QString::number(svgPathParser.path.length()));
+        renderArea->showSvg = true;
+   }
+    else {
+       renderArea->showSvg = false;
+        findChild<QLabel *>("pathLength")->setText("");
+   }
+   renderArea->update();
 }
 
 void MainWindow::on_trajDensity_valueChanged(int value)
