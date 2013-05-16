@@ -47,12 +47,22 @@ bool SvgPathParser::read(QIODevice *device)
 
 }
 
+/** SVG Path parser.
+
+**Very incomplete!** Mostly suited to Inkscape output
+
+- it assumes the path starts with M or m, followed by the absolute
+position of the curve on the page (ie, for 'm', that the path belongs to
+something centered on zero)
+
+
+- TODO: spaces between the letter of the command and the values is not mandatory! we assume here it exists
+*/
 bool SvgPathParser::parsePath(std::string &content)
 {
     //Tokenize the input
     // stolen from http://stackoverflow.com/questions/236129/splitting-a-string-in-c
 
-    //TODO: spaces between the letter of the command and the values is not mandatory! we assume here it exists
     vector<string> tokens;
     istringstream iss(content);
     copy(istream_iterator<string>(iss),
@@ -60,52 +70,75 @@ bool SvgPathParser::parsePath(std::string &content)
          back_inserter<vector<string> >(tokens));
 
 
+    path.curves.clear();
+
+    mode currentmode;
     point prev_point;
     prev_point.x = prev_point.y = 0;
     for (int i = 0; i < tokens.size() ; i++) {
         auto tok = tokens[i];
         if(tok.size() == 1) {// command
-            if (tok.compare("M") == 0) {
+            if (tok.compare("M") == 0 or tok.compare("m") == 0) {
+                currentmode = MOVE;
                 path.origin = splitToken(tokens[i+1]);
                 i++;
             }
             else if (tok.compare("C") == 0) {
-                bezier curve;
-                point c1 = splitToken(tokens[i+1]);
-                point c2 = splitToken(tokens[i+2]);
-                point p = splitToken(tokens[i+3]);
-
-                curve.ox = prev_point.x;
-                curve.oy = prev_point.y;
-                curve.c1x = c1.x - path.origin.x;
-                curve.c1y = c1.y - path.origin.y;
-                curve.c2x = c2.x - path.origin.x;
-                curve.c2y = c2.y - path.origin.y;
-                curve.x = prev_point.x = p.x - path.origin.x;
-                curve.y = prev_point.y = p.y - path.origin.y;
-
-                path.curves.push_back(curve);
-
-                i = i+3;
+                currentmode = ABSCUBIC;
             }
             else if (tok.compare("c") == 0) {
-                bezier curve;
-                point c1 = splitToken(tokens[i+1]);
-                point c2 = splitToken(tokens[i+2]);
-                point p = splitToken(tokens[i+3]);
-
-                curve.c1x = c1.x;
-                curve.c1y = c1.y;
-                curve.c2x = c2.x;
-                curve.c2y = c2.y;
-                curve.x = p.x;
-                curve.y = p.y;
-
-                path.curves.push_back(curve);
-
-                i = i+3;
+                currentmode = RELCUBIC;
             }
             else cerr << "Unknown command! <" << tok << ">" << endl;
+        }
+        else // coordinates
+        {
+            bezier curve;
+            point c1, c2, p;
+
+            switch(currentmode) {
+                case MOVE:
+                    cerr << "Multiple coords after moveTo command not supported" << endl;
+                    break;
+                case ABSCUBIC:
+                    c1 = splitToken(tokens[i]);
+                    c2 = splitToken(tokens[i+1]);
+                    p = splitToken(tokens[i+2]);
+
+                    curve.ox = prev_point.x;
+                    curve.oy = prev_point.y;
+                    curve.c1x = c1.x - path.origin.x;
+                    curve.c1y = c1.y - path.origin.y;
+                    curve.c2x = c2.x - path.origin.x;
+                    curve.c2y = c2.y - path.origin.y;
+                    curve.x = prev_point.x = p.x - path.origin.x;
+                    curve.y = prev_point.y = p.y - path.origin.y;
+
+                    path.curves.push_back(curve);
+
+                    i = i+2;
+                    break;
+
+                case RELCUBIC:
+                    c1 = splitToken(tokens[i]);
+                    c2 = splitToken(tokens[i+1]);
+                    p = splitToken(tokens[i+2]);
+
+                    curve.ox = prev_point.x;
+                    curve.oy = prev_point.y;
+                    curve.c1x = c1.x + curve.ox;
+                    curve.c1y = c1.y + curve.oy ;
+                    curve.c2x = c2.x + curve.ox;
+                    curve.c2y = c2.y + curve.oy;
+                    curve.x = prev_point.x = p.x + curve.ox;
+                    curve.y = prev_point.y = p.y + curve.oy;
+
+
+                    path.curves.push_back(curve);
+
+                    i = i+2;
+                    break;
+            }
         }
     }
 

@@ -14,6 +14,7 @@ public:
     bezierpath path;
 
 private:
+    enum mode {MOVE, RELCUBIC, ABSCUBIC};
     bool parsePath(std::string& content);
     point splitToken(std::string& tok);
 };
