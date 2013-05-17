@@ -45,6 +45,9 @@
 
 using namespace std;
 
+#define DPI 90
+#define MM2INCH 0.0393701
+
 RenderArea::RenderArea(QWidget *parent)
     : QWidget(parent)
 {
@@ -54,8 +57,8 @@ RenderArea::RenderArea(QWidget *parent)
     setAutoFillBackground(true);
 
     zoom = 1.0;
-    center.setX(width() / 2);
-    center.setY(height() / 2);
+    center.setX(50);
+    center.setY(50);
     showCtlPoints = false;
     showTrajPoints = false;
     showSvg = true;
@@ -113,13 +116,20 @@ void RenderArea::drawGrid(QPainter& painter) {
 
     const int MIN_X = -1000;
     const int MIN_Y = -1000;
-    const int MAX_X = 1000;
-    const int MAX_Y = 1000;
+    const int MAX_X = 5000;
+    const int MAX_Y = 5000;
     const int GRID_SIZE = 100;
 
     painter.save();
+
+    // draw A4 paper sheet
+    painter.setRenderHint(QPainter::Antialiasing, false);
+
+    painter.fillRect(QRectF(0, 0, 210 * MM2INCH * DPI, 297 * MM2INCH * DPI), QColor::fromRgbF(1.,1.,1.));
+
     painter.setPen(QPen(QColor::fromRgbF(0.,0.,0.,0.2)));
 
+    painter.setRenderHint(QPainter::Antialiasing, true);
     for (int i = MIN_X ; i < MAX_X ; i += GRID_SIZE) {
             painter.drawLine(i,MIN_Y, i, MAX_Y);
             painter.drawText(i + 5,-5,QString::number(i));
@@ -146,6 +156,10 @@ void RenderArea::drawTraj(QPainter &painter)
 void RenderArea::paintEvent(QPaintEvent * /* event */)
 {
     QPainter painter(this);
+
+    // background
+    painter.fillRect(QRect(0, 0, width(), height()), QColor::fromRgbF(.7,.7,.7));
+
     painter.setPen(QPen(QColor::fromRgbF(0.,0.,0.,0.2)));
     painter.setBrush(Qt::NoBrush);
     if (antialiased)
@@ -171,8 +185,6 @@ void RenderArea::paintEvent(QPaintEvent * /* event */)
 
     painter.restore();
 
-    painter.setRenderHint(QPainter::Antialiasing, false);
-    painter.setPen(palette().dark().color());
-    painter.setBrush(Qt::NoBrush);
-    painter.drawRect(QRect(0, 0, width() - 1, height() - 1));
+
+
 }
