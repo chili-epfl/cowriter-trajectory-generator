@@ -4,9 +4,11 @@
 
 using namespace std;
 
-TrajSampler::TrajSampler(const BezierPath &path) : bpath(path) {}
 
-BaseSampler::BaseSampler(const BezierPath &path) : TrajSampler(path) {}
+void TrajSampler::setPath(const BezierPath &path)
+{
+    bpath = path;
+}
 
 vector<point> BaseSampler::sample(int density)
 {
@@ -27,9 +29,7 @@ vector<point> BaseSampler::sample(int density)
     return points;
 }
 
-HomogenousSampler::HomogenousSampler(const BezierPath &path) : TrajSampler(path) {}
-
-vector<point> HomogenousSampler::sample(int density)
+vector<point> HomogeneousSampler::sample(int density)
 {
     float len = bpath.length();
 
@@ -44,8 +44,25 @@ vector<point> HomogenousSampler::sample(int density)
             p.x += bpath.origin.x;
             p.y += bpath.origin.y;
             points.push_back(p);
-            curvatures.push_back(0.0);
+            curvatures.push_back(bpath.curvatureAtDistance(dist));
     }
 
     return points;
+}
+
+#define ITERATIONS 5
+std::vector<point> CurvatureSampler::sample(int density)
+{
+    HomogeneousSampler sampler;
+    sampler.setPath(bpath);
+    auto distribution = sampler.sample(density);
+    auto initialCurvatures = sampler.curvatures;
+
+    for (int j = 0; j < ITERATIONS; j++) {
+
+        for (int i = 0; i < initialDistribution.size(); i++) {
+            //TODO!
+        }
+    }
+    return distribution;
 }

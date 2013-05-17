@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     renderArea = new RenderArea;
     setCentralWidget(renderArea);
 
+    sampler = new HomogeneousSampler();
+
     density = 5;
 }
 
@@ -50,7 +52,7 @@ void MainWindow::open()
          }
 
          if (svgPathParser.read(&file)) {
-             sampler = new HomogenousSampler(svgPathParser.path);
+             sampler->setPath(svgPathParser.path);
              statusBar()->showMessage(tr("File loaded"), 2000);
              findChild<QLabel *>("pathLength")->setText("Length: " + QString::number(svgPathParser.path.length()));
          }
@@ -107,14 +109,17 @@ void MainWindow::on_showCtlPoints_stateChanged(int arg1)
     renderArea->update();
 }
 
-int MainWindow::setTrajPoints(const BezierPath &bpath)
+int MainWindow::setTrajPoints()
 {
 
     auto path = sampler->sample(density);
 
+    bool hasCurvature = true;
+    if (sampler->curvatures.empty()) hasCurvature = false;
+
     vector<pair<point, float> > traj;
     for (int i = 0; i < path.size(); i++) {
-        float normalizedCurvature = fmin(1.0, fmax(0.0, sampler->curvatures[i] * 10));
+        float normalizedCurvature = hasCurvature ? fmin(1.0, fmax(0.0, sampler->curvatures[i] * 10)) : 0.0;
         pair<point, float> elem(path[i], normalizedCurvature);
         traj.push_back(elem);
     }
@@ -129,7 +134,7 @@ int MainWindow::setTrajPoints(const BezierPath &bpath)
 void MainWindow::on_groupBox_toggled(bool arg1)
 {
    if (!renderArea->showTrajPoints) {
-        int len = setTrajPoints(svgPathParser.path);
+        int len = setTrajPoints();
         findChild<QLabel *>("nbPoints")->setText(QString::number(len) + " points");
         renderArea->showTrajPoints = true;
         renderArea->update();
@@ -157,7 +162,7 @@ void MainWindow::on_showSvg_stateChanged(int arg1)
 void MainWindow::on_trajDensity_valueChanged(int value)
 {
     density = value;
-    int len = setTrajPoints(svgPathParser.path);
+    int len = setTrajPoints();
     findChild<QLabel *>("nbPoints")->setText(QString::number(len) + " points");
     renderArea->update();
 }
@@ -175,10 +180,16 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_samplingMethod_currentIndexChanged(const QString &method)
 {
     delete sampler;
-    if  (method == "Homogeneous") sampler = new HomogenousSampler(svgPathParser.path);
-    else sampler = new BaseSampler(svgPathParser.path);
+    if  (method == "Homogeneous")
+        sampler = new HomogeneousSampler();
+    else if  (method == "Curvature")
+        sampler = new CurvatureSampler();
+    else
+        sampler = new BaseSampler();
 
-    int len = setTrajPoints(svgPathParser.path);
+    sampler->setPath(svgPathParser.path);
+
+    int len = setTrajPoints();
     findChild<QLabel *>("nbPoints")->setText(QString::number(len) + " points");
     renderArea->update();
 }

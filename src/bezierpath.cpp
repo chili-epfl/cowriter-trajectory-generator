@@ -192,4 +192,38 @@ point BezierPath::pointAtDistance(float dist, float error) const
     return p;
 }
 
+float BezierPath::curvatureAtDistance(float dist, float error) const
+{
+    float len = 0.0;
+    float old_len = 0.0;
+
+    for ( auto c : curves) {
+        old_len = len;
+        len += c.length();
+        if (dist <= len) {
+            auto pos = c.getParamForLength(dist - old_len, error);
+            float t = pos.first;
+            if (t < 0.) t = 1.0;
+            return c.curvatureAt(t);
+        }
+    }
+    // distance over path length!
+    cerr << "Unreachable distance (path length is " << len << ")!" <<endl;
+
+    return 0.;
+}
+
+
+point BezierPath::pointAt(float t) const
+{
+    float dist = length() * t;
+    return pointAtDistance(dist);
+}
+
+float BezierPath::curvatureAt(float t) const
+{
+    float dist = length() * t;
+    return curvatureAtDistance(dist);
+}
+
 

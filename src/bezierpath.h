@@ -43,6 +43,9 @@ struct BezierPath {
 
     float length(float error = 1.0) const;
     point pointAtDistance(float distance, float error = 0.001) const;
+    float curvatureAtDistance(float dist, float error = 0.001) const;
+    point pointAt(float t) const;
+    float curvatureAt(float t) const;
 };
 
 #endif // BEZIERPATH_H

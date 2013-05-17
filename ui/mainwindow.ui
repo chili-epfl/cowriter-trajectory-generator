@@ -129,6 +129,11 @@
               </item>
               <item>
                <property name="text">
+                <string>Curvature</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
                 <string>Per patch</string>
                </property>
               </item>

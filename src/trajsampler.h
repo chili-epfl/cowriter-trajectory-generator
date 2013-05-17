@@ -8,28 +8,36 @@
 class TrajSampler
 {
 public:
-    TrajSampler(const BezierPath& path);
+    void setPath(const BezierPath& path);
 
     virtual std::vector<point> sample(int density) = 0;
 
     std::vector<float> curvatures;
 
 protected:
-    const BezierPath& bpath;
+    BezierPath bpath;
 };
 
 class BaseSampler : public TrajSampler
 {
 public:
-    BaseSampler(const BezierPath& path);
     std::vector<point> sample(int density);
 };
 
-class HomogenousSampler : public TrajSampler
+class HomogeneousSampler : public TrajSampler
 {
 public:
-    HomogenousSampler(const BezierPath& path);
     std::vector<point> sample(int density);
 };
+
+class CurvatureSampler : public TrajSampler
+{
+public:
+    std::vector<point> sample(int density);
+
+protected:
+    void moveAlongCurve(std::vector<point>& points);
+};
+
 
 #endif // TRAJSAMPLER_H

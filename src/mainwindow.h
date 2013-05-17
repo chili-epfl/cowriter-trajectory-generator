@@ -53,7 +53,7 @@ private:
     QPoint initialDragPos;
 
     int initSampler();
-    int setTrajPoints(const BezierPath &bpath);
+    int setTrajPoints();
     void displayMousePosition(const QPoint& pos);
 
     void wheelEvent(QWheelEvent *evt);
