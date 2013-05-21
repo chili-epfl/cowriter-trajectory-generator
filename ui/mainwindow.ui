@@ -140,6 +140,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="displayVelocities">
+              <property name="text">
+               <string>Velocities</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="label">
               <property name="text">
                <string>Density</string>

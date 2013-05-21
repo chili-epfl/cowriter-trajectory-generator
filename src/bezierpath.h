@@ -26,6 +26,10 @@ struct BezierCubicPatch {
 
     float curvatureAt(float t) const;
 
+    /* Returns the velocity vector at time t
+    */
+    point velocityAt(float t) const;
+
     std::pair<float, float> getParamForLength(float target, float error = 0.1, float t = 0.0, float width = 1.0, float offset = 0.0) const;
 
 private:
@@ -44,6 +48,7 @@ struct BezierPath {
     float length(float error = 1.0) const;
     point pointAtDistance(float distance, float error = 0.001) const;
     float curvatureAtDistance(float dist, float error = 0.001) const;
+    point velocityAtDistance(float dist, float error = 0.001) const;
     point pointAt(float t) const;
     float curvatureAt(float t) const;
 };

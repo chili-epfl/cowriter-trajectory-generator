@@ -49,7 +49,9 @@
 #include <QPixmap>
 #include <QWidget>
 
-#include "bezierpath.h"
+#include "trajsampler.h"
+class BezierPath;
+
 class RenderArea : public QWidget
 {
     Q_OBJECT
@@ -64,12 +66,13 @@ public:
     void preparePath(const BezierPath& bpath);
 
     // takes a list of 2D points with an associated 'strength' used for displaying stuff like curvature
-    void setTrajPoints(const std::vector<std::pair<point, float> > &points);
+    int setTrajPoints(const Trajectory &traj);
 
     QPoint center;
     double zoom;
     bool showCtlPoints;
     bool showTrajPoints;
+    bool showVelocities;
     bool showSvg;
 
 public slots:
@@ -82,7 +85,11 @@ private:
     QPainterPath path;
     QPolygonF ctlPoints;
     QPolygonF points;
+
+    // holds colors associated to points on the path. Used to display stuff like curvature
     std::vector<QColor> pointsColors;
+    // holds polygons associated to points on the path. Used to display stuff like velocities
+    std::vector<QPolygonF> pointsPolygons;
 
     void drawGrid(QPainter &painter);
     void drawTraj(QPainter &painter);

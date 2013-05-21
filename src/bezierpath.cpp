@@ -66,6 +66,14 @@ float BezierCubicPatch::curvatureAt(float t) const
     return fabs(xprime * yprimeprime - yprime * xprimeprime) / pow(xprime * xprime + yprime * yprime, 1.5);
 }
 
+point BezierCubicPatch::velocityAt(float t) const
+{
+    point p;
+    p.x = derivate(t, ox, c1x, c2x, x);
+    p.y = derivate(t, oy, c1y, c2y, y);
+    return p;
+}
+
 void BezierCubicPatch::split(BezierCubicPatch *left, BezierCubicPatch *right) const
 {
     //"bezsplit" is lifted shamelessly from Schneider's Bezier curve-fitter.
@@ -211,6 +219,28 @@ float BezierPath::curvatureAtDistance(float dist, float error) const
     cerr << "Unreachable distance (path length is " << len << ")!" <<endl;
 
     return 0.;
+}
+
+point BezierPath::velocityAtDistance(float dist, float error) const
+{
+    float len = 0.0;
+    float old_len = 0.0;
+
+    for ( auto c : curves) {
+        old_len = len;
+        len += c.length();
+        if (dist <= len) {
+            auto pos = c.getParamForLength(dist - old_len, error);
+            float t = pos.first;
+            if (t < 0.) t = 1.0;
+            return c.velocityAt(t);
+        }
+    }
+    // distance over path length!
+    cerr << "Unreachable distance (path length is " << len << ")!" <<endl;
+
+    point p; p.x = p.y = 0.;
+    return p;
 }
 
 

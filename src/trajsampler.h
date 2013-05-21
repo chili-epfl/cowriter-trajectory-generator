@@ -5,14 +5,21 @@
 
 #include "bezierpath.h"
 
+struct TrajPoint
+{
+    point p;
+    float curvature;
+    point vel;
+};
+
+typedef std::vector<TrajPoint> Trajectory;
+
 class TrajSampler
 {
 public:
     void setPath(const BezierPath& path);
 
-    virtual std::vector<point> sample(int density) = 0;
-
-    std::vector<float> curvatures;
+    virtual Trajectory sample(int density) = 0;
 
 protected:
     BezierPath bpath;
@@ -21,22 +28,19 @@ protected:
 class BaseSampler : public TrajSampler
 {
 public:
-    std::vector<point> sample(int density);
+    Trajectory sample(int density);
 };
 
 class HomogeneousSampler : public TrajSampler
 {
 public:
-    std::vector<point> sample(int density);
+    Trajectory sample(int density);
 };
 
 class CurvatureSampler : public TrajSampler
 {
 public:
-    std::vector<point> sample(int density);
-
-protected:
-    void moveAlongCurve(std::vector<point>& points);
+    Trajectory sample(int density);
 };
 
 

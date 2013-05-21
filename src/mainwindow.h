@@ -42,6 +42,8 @@ private slots:
 
     void on_samplingMethod_currentIndexChanged(const QString &arg1);
 
+    void on_displayVelocities_stateChanged(int arg1);
+
 private:
     RenderArea *renderArea;
     SvgPathParser svgPathParser;
@@ -53,7 +55,6 @@ private:
     QPoint initialDragPos;
 
     int initSampler();
-    int setTrajPoints();
     void displayMousePosition(const QPoint& pos);
 
     void wheelEvent(QWheelEvent *evt);

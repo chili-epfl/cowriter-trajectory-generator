@@ -41,6 +41,7 @@
 
 #include <QtGui>
 
+#include "bezierpath.h"
 #include "renderarea.h"
 
 using namespace std;
@@ -61,6 +62,7 @@ RenderArea::RenderArea(QWidget *parent)
     center.setY(50);
     showCtlPoints = false;
     showTrajPoints = false;
+    showVelocities = false;
     showSvg = true;
 }
 
@@ -92,16 +94,24 @@ void RenderArea::preparePath(const BezierPath &bpath)
 
 }
 
-void RenderArea::setTrajPoints(const vector<pair<point, float> > &bpoints)
+int RenderArea::setTrajPoints(const Trajectory &traj)
 {
     points.clear();
     pointsColors.clear();
-    for (auto p : bpoints) {
-        points << QPointF(p.first.x, p.first.y);
+    pointsPolygons.clear();
 
-        pointsColors.push_back(QColor::fromRgbF(p.second,0,0,1.0));
+    for (auto tp : traj) {
+        points << QPointF(tp.p.x, tp.p.y);
+
+        float val = fmin(1.0, fmax(0.0, tp.curvature * 10));
+        pointsColors.push_back(QColor::fromRgbF(val,0,0,1.0));
+        QPolygonF poly;
+        poly << QPointF(tp.p.x, tp.p.y) << QPointF(tp.vel.x + tp.p.x, tp.vel.y + tp.p.y);
+        pointsPolygons.push_back(poly);
+
 
     }
+    return traj.size();
 }
 
 
@@ -149,6 +159,10 @@ void RenderArea::drawTraj(QPainter &painter)
     for (int i = 0; i < points.size(); i++) {
         painter.setPen(QPen(pointsColors[i], 2, Qt::SolidLine, Qt::RoundCap));
         painter.drawPoint(points[i]);
+        if (showVelocities) {
+            painter.setPen(QPen(Qt::black, 0.2, Qt::SolidLine, Qt::RoundCap));
+            painter.drawPolygon(pointsPolygons[i]);
+        }
     }
 }
 

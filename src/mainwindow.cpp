@@ -109,32 +109,10 @@ void MainWindow::on_showCtlPoints_stateChanged(int arg1)
     renderArea->update();
 }
 
-int MainWindow::setTrajPoints()
-{
-
-    auto path = sampler->sample(density);
-
-    bool hasCurvature = true;
-    if (sampler->curvatures.empty()) hasCurvature = false;
-
-    vector<pair<point, float> > traj;
-    for (int i = 0; i < path.size(); i++) {
-        float normalizedCurvature = hasCurvature ? fmin(1.0, fmax(0.0, sampler->curvatures[i] * 10)) : 0.0;
-        pair<point, float> elem(path[i], normalizedCurvature);
-        traj.push_back(elem);
-    }
-
-    renderArea->setTrajPoints(traj);
-
-    return path.size();
-
-}
-
-
 void MainWindow::on_groupBox_toggled(bool arg1)
 {
    if (!renderArea->showTrajPoints) {
-        int len = setTrajPoints();
+        int len = renderArea->setTrajPoints(sampler->sample(density));
         findChild<QLabel *>("nbPoints")->setText(QString::number(len) + " points");
         renderArea->showTrajPoints = true;
         renderArea->update();
@@ -162,7 +140,7 @@ void MainWindow::on_showSvg_stateChanged(int arg1)
 void MainWindow::on_trajDensity_valueChanged(int value)
 {
     density = value;
-    int len = setTrajPoints();
+    int len = renderArea->setTrajPoints(sampler->sample(density));
     findChild<QLabel *>("nbPoints")->setText(QString::number(len) + " points");
     renderArea->update();
 }
@@ -172,8 +150,8 @@ void MainWindow::on_trajDensity_valueChanged(int value)
 void MainWindow::on_pushButton_clicked()
 {
     auto traj = sampler->sample(density);
-    for (auto p : traj) {
-        cout << p.x << "," << p.y << endl;
+    for (auto tp : traj) {
+        cout << tp.p.x << "," << tp.p.y << endl;
     }
 }
 
@@ -189,7 +167,20 @@ void MainWindow::on_samplingMethod_currentIndexChanged(const QString &method)
 
     sampler->setPath(svgPathParser.path);
 
-    int len = setTrajPoints();
+    int len = renderArea->setTrajPoints(sampler->sample(density));
     findChild<QLabel *>("nbPoints")->setText(QString::number(len) + " points");
     renderArea->update();
+}
+
+
+void MainWindow::on_displayVelocities_stateChanged(int arg1)
+{
+
+   if (!renderArea->showVelocities) {
+        renderArea->showVelocities = true;
+   }
+    else {
+       renderArea->showVelocities = false;
+   }
+   renderArea->update();
 }
