@@ -58,9 +58,18 @@ struct BezierPath {
 
     float length(float error = 0.001) const;
     point pointAtDistance(float distance) const;
+
+    /**
+    normalized curvature: curvature is computed based on the second
+    derivative of the parametric curve (cf
+    https://en.wikipedia.org/wiki/Curvature#Curvature_of_plane_curves )
+    and normalized by applying the fonction: 1-1/(2x+1) where x is the raw
+    curvature.
+    **/
     float curvatureAtDistance(float dist) const;
     point velocityAtDistance(float dist) const;
     point pointAt(float t) const;
+    // normalized curvature
     float curvatureAt(float t) const;
 };
 

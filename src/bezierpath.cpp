@@ -227,7 +227,8 @@ float BezierPath::curvatureAtDistance(float dist) const
         if (dist <= len) {
             float t = c->paramAtDist(dist - old_len);
             if (t < 0.) t = 1.0;
-            return c->curvatureAt(t);
+            float curvature = c->curvatureAt(t);
+            return 1. - (1./(2*curvature + 1));
         }
     }
     // distance over path length!
