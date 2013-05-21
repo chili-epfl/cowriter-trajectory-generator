@@ -44,11 +44,14 @@ private slots:
 
     void on_displayVelocities_stateChanged(int arg1);
 
+    void on_iterations_valueChanged(int value);
+
 private:
     RenderArea *renderArea;
     SvgPathParser svgPathParser;
     TrajSampler* sampler;
     int density; // density of points when generating trajectory -> nb of points generated per cubic spline
+    int iterations; // nb of iterations for iterative samplers
 
     Ui::MainWindow *ui;
 

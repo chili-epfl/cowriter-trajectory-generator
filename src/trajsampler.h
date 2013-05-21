@@ -21,7 +21,7 @@ public:
 
     virtual ~TrajSampler() {}
 
-    virtual Trajectory sample(int density) = 0;
+    virtual Trajectory sample(int density, int iterations = 1) = 0;
 
 protected:
     BezierPath bpath;
@@ -34,19 +34,19 @@ protected:
 class BaseSampler : public TrajSampler
 {
 public:
-    Trajectory sample(int density);
+    Trajectory sample(int density, int iterations);
 };
 
 class HomogeneousSampler : public TrajSampler
 {
 public:
-    Trajectory sample(int density);
+    Trajectory sample(int density, int iterations);
 };
 
 class CurvatureSampler : public TrajSampler
 {
 public:
-    Trajectory sample(int density);
+    Trajectory sample(int density, int iterations);
 };
 
 

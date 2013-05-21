@@ -20,7 +20,7 @@ void TrajSampler::stopSampling()
     cerr << "Sampling took " << ((float)(clock() - starttime)) / (CLOCKS_PER_SEC * 0.001) << "ms" << endl;
 }
 
-Trajectory BaseSampler::sample(int density)
+Trajectory BaseSampler::sample(int density, int iterations)
 {
     Trajectory traj;
 
@@ -42,7 +42,7 @@ Trajectory BaseSampler::sample(int density)
     return traj;
 }
 
-Trajectory HomogeneousSampler::sample(int density)
+Trajectory HomogeneousSampler::sample(int density, int iterations)
 {
     Trajectory traj;
 
@@ -68,24 +68,45 @@ Trajectory HomogeneousSampler::sample(int density)
     return traj;
 }
 
-#define ITERATIONS 5
-Trajectory CurvatureSampler::sample(int density)
+Trajectory CurvatureSampler::sample(int density, int iterations)
 {
     Trajectory traj;
 
     startSampling();
 
-    HomogeneousSampler sampler;
-    sampler.setPath(bpath);
-    auto distribution = sampler.sample(density);
+    vector<float> distribution, next_distribution;
 
-    for (int j = 0; j < ITERATIONS; j++) {
+    // create initial homogeneous distribution
+    float len = bpath.length();
+    float inc = len / (density * 10);
+    for (float dist = 0.0 ; dist <= len ; dist += inc) {
+        distribution.push_back(dist);
+    }
 
-        for (int i = 0; i < distribution.size(); i++) {
-            //TODO!
+    for (uint j = 0; j < iterations; j++) {
+        next_distribution.push_back(distribution[0]);
+
+        for (uint i = 1; i < distribution.size() - 1; i++) {
+            //TODO: optimization: we compute 2 times curvature for the same distance!
+            float displ = bpath.curvatureAtDistance(distribution.at(i + 1)) - bpath.curvatureAtDistance(distribution.at(i - 1));
+            next_distribution.push_back(distribution.at(i) + displ * 100);
         }
+        next_distribution.push_back(distribution.back());
+        distribution = next_distribution;
+        next_distribution.clear();
     }
 
     stopSampling();
+
+    for (float dist : distribution) {
+        TrajPoint tp;
+        point p = bpath.pointAtDistance(dist);
+        p.x += bpath.origin.x;
+        p.y += bpath.origin.y;
+        tp.p = p;
+        tp.curvature = bpath.curvatureAtDistance(dist);
+        tp.vel = bpath.velocityAtDistance(dist);
+        traj.push_back(tp);
+    }
     return traj;
 }
