@@ -23,6 +23,10 @@ public:
 
 protected:
     BezierPath bpath;
+
+    void startSampling();
+    void stopSampling();
+    clock_t starttime;
 };
 
 class BaseSampler : public TrajSampler

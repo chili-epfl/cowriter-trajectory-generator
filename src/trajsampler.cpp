@@ -1,4 +1,5 @@
-#include<iostream>
+#include <iostream>
+#include <time.h>
 
 #include "trajsampler.h"
 
@@ -10,10 +11,20 @@ void TrajSampler::setPath(const BezierPath &path)
     bpath = path;
 }
 
+void TrajSampler::startSampling()
+{
+    starttime = clock();
+}
+void TrajSampler::stopSampling()
+{
+    cerr << "Sampling took " << ((float)(clock() - starttime)) / (CLOCKS_PER_SEC * 0.001) << "ms" << endl;
+}
+
 Trajectory BaseSampler::sample(int density)
 {
     Trajectory traj;
 
+    startSampling();
     for (auto curve : bpath.curves) {
         for (float t = 0.; t < 1 ; t += 1.f/density) {
             TrajPoint tp;
@@ -27,6 +38,7 @@ Trajectory BaseSampler::sample(int density)
         }
     }
 
+    stopSampling();
     return traj;
 }
 
@@ -39,6 +51,8 @@ Trajectory HomogeneousSampler::sample(int density)
     float inc = len / (density * 10);
 
 
+    startSampling();
+
     for (float dist = 0.0 ; dist <= len ; dist += inc) {
             TrajPoint tp;
             point p = bpath.pointAtDistance(dist);
@@ -50,6 +64,7 @@ Trajectory HomogeneousSampler::sample(int density)
             traj.push_back(tp);
     }
 
+    stopSampling();
     return traj;
 }
 
@@ -57,6 +72,8 @@ Trajectory HomogeneousSampler::sample(int density)
 Trajectory CurvatureSampler::sample(int density)
 {
     Trajectory traj;
+
+    startSampling();
 
     HomogeneousSampler sampler;
     sampler.setPath(bpath);
@@ -68,5 +85,7 @@ Trajectory CurvatureSampler::sample(int density)
             //TODO!
         }
     }
+
+    stopSampling();
     return traj;
 }
