@@ -35,7 +35,7 @@ bool SvgPathParser::read(QIODevice *device)
     }
 
     QDomNodeList paths = domDocument.elementsByTagName("path");
-    for (int i = 0; i < paths.length(); i++) {
+    for (uint i = 0; i < paths.length(); i++) {
         QDomElement path = paths.at(i).toElement();
         cout << "Found path " << path.attribute("id", "no id").toStdString() << endl;
         pathDesc = path.attribute("d", "").toStdString();
@@ -75,7 +75,7 @@ bool SvgPathParser::parsePath(std::string &content)
     mode currentmode;
     point prev_point;
     prev_point.x = prev_point.y = 0;
-    for (int i = 0; i < tokens.size() ; i++) {
+    for (uint i = 0; i < tokens.size() ; i++) {
         auto tok = tokens[i];
         if(tok.size() == 1) {// command
             if (tok.compare("M") == 0 or tok.compare("m") == 0) {

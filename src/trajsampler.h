@@ -19,6 +19,8 @@ class TrajSampler
 public:
     void setPath(const BezierPath& path);
 
+    virtual ~TrajSampler() {}
+
     virtual Trajectory sample(int density) = 0;
 
 protected:
