@@ -7,6 +7,13 @@
 
 using namespace std;
 
+BezierCubicPatch::BezierCubicPatch()
+{
+    last_error = 0.;
+    last_length = 0.;
+    param_length_cache.clear();
+}
+
 point BezierCubicPatch::pointAt(float t) const
 {
     point p;
@@ -14,9 +21,6 @@ point BezierCubicPatch::pointAt(float t) const
     //cf http://en.wikipedia.org/wiki/B%C3%A9zier_curve
     p.x = pos(t, ox, c1x, c2x, x);
     p.y = pos(t, oy, c1y, c2y, y);
-    if (p.x < -10) {
-        cout <<  "tto" << endl;
-    }
     return p;
 }
 
@@ -50,14 +54,12 @@ float BezierCubicPatch::sec_derivate(float t, float a, float b, float c, float d
 
 float BezierCubicPatch::length(float error) const
 {
-    if (length_cache.find(error) == length_cache.end()) {
+    //we recompute the length only if the error threshold has changed.
+    if (error == last_error) return last_length;
 
-            float len;
-            addifclose(&len, error);
-            length_cache[error] = len;
-            return len;
-    }
-    return length_cache[error];
+    last_length = addifclose(error);
+    last_error = error;
+    return last_length;
 }
 
 float BezierCubicPatch::curvatureAt(float t) const
@@ -78,7 +80,6 @@ point BezierCubicPatch::velocityAt(float t) const
     p.y = derivate(t, oy, c1y, c2y, y);
     return p;
 }
-
 void BezierCubicPatch::split(BezierCubicPatch *left, BezierCubicPatch *right) const
 {
     //"bezsplit" is lifted shamelessly from Schneider's Bezier curve-fitter.
@@ -125,7 +126,7 @@ void BezierCubicPatch::split(BezierCubicPatch *left, BezierCubicPatch *right) co
     right->y =  Vtemp[0][3].y;
 }
 
-void BezierCubicPatch::addifclose(float *length, float error) const
+float BezierCubicPatch::addifclose(float error) const
 {
     BezierCubicPatch left, right;                  /* bez poly splits */
 
@@ -138,17 +139,28 @@ void BezierCubicPatch::addifclose(float *length, float error) const
     if((len-chord) > error)
     {
       split(&left,&right);                 /* split in two */
-      left.addifclose(length, error);        /* try left side */
-      right.addifclose(length, error);       /* try right side */
-      return;
+      len = left.addifclose(error);        /* try left side */
+      len += right.addifclose(error);       /* try right side */
+      return len;
     }
 
-    *length = *length + len;
-
-    return;
+    return len;
 }
 
-pair<float, float> BezierCubicPatch::getParamForLength(float target, float error, float t, float width, float offset) const
+
+float BezierCubicPatch::paramAtDist(float dist) const
+{
+    if (param_length_cache.find(dist) == param_length_cache.end()) {
+
+            auto res = recursiveComputeParamAtDist(dist);
+            param_length_cache[dist] = res.first;
+            return res.first;
+    }
+    return param_length_cache[dist];
+}
+
+
+pair<float, float> BezierCubicPatch::recursiveComputeParamAtDist(float target, float error, float t, float width, float offset) const
 {
     float len = length(error);
     float delta = (offset + len) - target;
@@ -165,9 +177,9 @@ pair<float, float> BezierCubicPatch::getParamForLength(float target, float error
     else {
         BezierCubicPatch left, right;
         split(&left,&right);
-        auto first_half = left.getParamForLength(target, error, t, width/2, offset);
+        auto first_half = left.recursiveComputeParamAtDist(target, error, t, width/2, offset);
         if (first_half.first < 0) { // we are above the length of the first half
-                return right.getParamForLength(target, error, t + width/2, width/2, offset + first_half.second);
+                return right.recursiveComputeParamAtDist(target, error, t + width/2, width/2, offset + first_half.second);
         }
         else return first_half;
     }
@@ -184,7 +196,7 @@ float BezierPath::length(float error) const
     return len;
 }
 
-point BezierPath::pointAtDistance(float dist, float error) const
+point BezierPath::pointAtDistance(float dist) const
 {
     float len = 0.0;
     float old_len = 0.0;
@@ -193,8 +205,7 @@ point BezierPath::pointAtDistance(float dist, float error) const
         old_len = len;
         len += c->length();
         if (dist <= len) {
-            auto pos = c->getParamForLength(dist - old_len, error);
-            float t = pos.first;
+            float t = c->paramAtDist(dist - old_len);
             if (t < 0.) t = 1.0;
             return c->pointAt(t);
         }
@@ -205,7 +216,7 @@ point BezierPath::pointAtDistance(float dist, float error) const
     return p;
 }
 
-float BezierPath::curvatureAtDistance(float dist, float error) const
+float BezierPath::curvatureAtDistance(float dist) const
 {
     float len = 0.0;
     float old_len = 0.0;
@@ -214,8 +225,7 @@ float BezierPath::curvatureAtDistance(float dist, float error) const
         old_len = len;
         len += c->length();
         if (dist <= len) {
-            auto pos = c->getParamForLength(dist - old_len, error);
-            float t = pos.first;
+            float t = c->paramAtDist(dist - old_len);
             if (t < 0.) t = 1.0;
             return c->curvatureAt(t);
         }
@@ -226,7 +236,7 @@ float BezierPath::curvatureAtDistance(float dist, float error) const
     return 0.;
 }
 
-point BezierPath::velocityAtDistance(float dist, float error) const
+point BezierPath::velocityAtDistance(float dist) const
 {
     float len = 0.0;
     float old_len = 0.0;
@@ -235,8 +245,7 @@ point BezierPath::velocityAtDistance(float dist, float error) const
         old_len = len;
         len += c->length();
         if (dist <= len) {
-            auto pos = c->getParamForLength(dist - old_len, error);
-            float t = pos.first;
+            float t = c->paramAtDist(dist - old_len);
             if (t < 0.) t = 1.0;
             return c->velocityAt(t);
         }
