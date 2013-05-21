@@ -93,7 +93,7 @@ bool SvgPathParser::parsePath(std::string &content)
         }
         else // coordinates
         {
-            BezierCubicPatch curve;
+            BezierCubicPatch* curve = new BezierCubicPatch();
             point c1, c2, p;
 
             switch(currentmode) {
@@ -105,14 +105,14 @@ bool SvgPathParser::parsePath(std::string &content)
                     c2 = splitToken(tokens[i+1]);
                     p = splitToken(tokens[i+2]);
 
-                    curve.ox = prev_point.x;
-                    curve.oy = prev_point.y;
-                    curve.c1x = c1.x - path.origin.x;
-                    curve.c1y = c1.y - path.origin.y;
-                    curve.c2x = c2.x - path.origin.x;
-                    curve.c2y = c2.y - path.origin.y;
-                    curve.x = prev_point.x = p.x - path.origin.x;
-                    curve.y = prev_point.y = p.y - path.origin.y;
+                    curve->ox = prev_point.x;
+                    curve->oy = prev_point.y;
+                    curve->c1x = c1.x - path.origin.x;
+                    curve->c1y = c1.y - path.origin.y;
+                    curve->c2x = c2.x - path.origin.x;
+                    curve->c2y = c2.y - path.origin.y;
+                    curve->x = prev_point.x = p.x - path.origin.x;
+                    curve->y = prev_point.y = p.y - path.origin.y;
 
                     path.curves.push_back(curve);
 
@@ -124,14 +124,14 @@ bool SvgPathParser::parsePath(std::string &content)
                     c2 = splitToken(tokens[i+1]);
                     p = splitToken(tokens[i+2]);
 
-                    curve.ox = prev_point.x;
-                    curve.oy = prev_point.y;
-                    curve.c1x = c1.x + curve.ox;
-                    curve.c1y = c1.y + curve.oy ;
-                    curve.c2x = c2.x + curve.ox;
-                    curve.c2y = c2.y + curve.oy;
-                    curve.x = prev_point.x = p.x + curve.ox;
-                    curve.y = prev_point.y = p.y + curve.oy;
+                    curve->ox = prev_point.x;
+                    curve->oy = prev_point.y;
+                    curve->c1x = c1.x + curve->ox;
+                    curve->c1y = c1.y + curve->oy ;
+                    curve->c2x = c2.x + curve->ox;
+                    curve->c2y = c2.y + curve->oy;
+                    curve->x = prev_point.x = p.x + curve->ox;
+                    curve->y = prev_point.y = p.y + curve->oy;
 
 
                     path.curves.push_back(curve);

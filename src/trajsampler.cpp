@@ -28,12 +28,12 @@ Trajectory BaseSampler::sample(int density)
     for (auto curve : bpath.curves) {
         for (float t = 0.; t < 1 ; t += 1.f/density) {
             TrajPoint tp;
-            point p = curve.pointAt(t);
+            point p = curve->pointAt(t);
             p.x += bpath.origin.x;
             p.y += bpath.origin.y;
             tp.p = p;
-            tp.curvature =  curve.curvatureAt(t);
-            tp.vel = curve.velocityAt(t);
+            tp.curvature =  curve->curvatureAt(t);
+            tp.vel = curve->velocityAt(t);
             traj.push_back(tp);
         }
     }

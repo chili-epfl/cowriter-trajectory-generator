@@ -1,6 +1,7 @@
 #ifndef BEZIERPATH_H
 #define BEZIERPATH_H
 
+#include <map>
 #include <vector>
 #include <utility> //pair
 
@@ -19,6 +20,8 @@ struct BezierCubicPatch {
     /**
       Algo to compute length based on Gravesen's + Hollasch impl
       http://steve.hollasch.net/cgindex/curves/cbezarclen.html
+
+      Use memoization for improved performances
 
       error: acceptable length error, in path's unit
     */
@@ -39,11 +42,13 @@ private:
     float pos(float t, float a, float b, float c, float d) const;
     float derivate(float t, float a, float b, float c, float d) const;
     float sec_derivate(float t, float a, float b, float c, float d) const;
+
+    mutable std::map<float, float> length_cache;
 };
 
 struct BezierPath {
     point origin;
-    std::vector<BezierCubicPatch> curves;
+    std::vector<BezierCubicPatch*> curves;
 
     float length(float error = 1.0) const;
     point pointAtDistance(float distance, float error = 0.001) const;

@@ -86,10 +86,10 @@ void RenderArea::preparePath(const BezierPath &bpath)
     ctlPoints << QPointF(ox, oy);
 
     for (auto curve : bpath.curves) {
-        path.cubicTo(curve.c1x + ox, curve.c1y + oy,
-                     curve.c2x + ox, curve.c2y + oy,
-                     curve.x + ox, curve.y + oy);
-        ctlPoints << QPointF(curve.x + ox, curve.y + oy);
+        path.cubicTo(curve->c1x + ox, curve->c1y + oy,
+                     curve->c2x + ox, curve->c2y + oy,
+                     curve->x + ox, curve->y + oy);
+        ctlPoints << QPointF(curve->x + ox, curve->y + oy);
     }
 
 }

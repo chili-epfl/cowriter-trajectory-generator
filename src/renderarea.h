@@ -50,7 +50,7 @@
 #include <QWidget>
 
 #include "trajsampler.h"
-class BezierPath;
+struct BezierPath;
 
 class RenderArea : public QWidget
 {

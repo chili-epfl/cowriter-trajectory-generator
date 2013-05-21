@@ -50,9 +50,14 @@ float BezierCubicPatch::sec_derivate(float t, float a, float b, float c, float d
 
 float BezierCubicPatch::length(float error) const
 {
-    float len;
-    addifclose(&len, error);
-    return len;
+    if (length_cache.find(error) == length_cache.end()) {
+
+            float len;
+            addifclose(&len, error);
+            length_cache[error] = len;
+            return len;
+    }
+    return length_cache[error];
 }
 
 float BezierCubicPatch::curvatureAt(float t) const
@@ -175,7 +180,7 @@ pair<float, float> BezierCubicPatch::getParamForLength(float target, float error
 float BezierPath::length(float error) const
 {
     float len = 0.0;
-    for (auto c : curves) len += c.length(error);
+    for (auto c : curves) len += c->length(error);
     return len;
 }
 
@@ -186,12 +191,12 @@ point BezierPath::pointAtDistance(float dist, float error) const
 
     for ( auto c : curves) {
         old_len = len;
-        len += c.length();
+        len += c->length();
         if (dist <= len) {
-            auto pos = c.getParamForLength(dist - old_len, error);
+            auto pos = c->getParamForLength(dist - old_len, error);
             float t = pos.first;
             if (t < 0.) t = 1.0;
-            return c.pointAt(t);
+            return c->pointAt(t);
         }
     }
     // distance over path length!
@@ -207,12 +212,12 @@ float BezierPath::curvatureAtDistance(float dist, float error) const
 
     for ( auto c : curves) {
         old_len = len;
-        len += c.length();
+        len += c->length();
         if (dist <= len) {
-            auto pos = c.getParamForLength(dist - old_len, error);
+            auto pos = c->getParamForLength(dist - old_len, error);
             float t = pos.first;
             if (t < 0.) t = 1.0;
-            return c.curvatureAt(t);
+            return c->curvatureAt(t);
         }
     }
     // distance over path length!
@@ -228,12 +233,12 @@ point BezierPath::velocityAtDistance(float dist, float error) const
 
     for ( auto c : curves) {
         old_len = len;
-        len += c.length();
+        len += c->length();
         if (dist <= len) {
-            auto pos = c.getParamForLength(dist - old_len, error);
+            auto pos = c->getParamForLength(dist - old_len, error);
             float t = pos.first;
             if (t < 0.) t = 1.0;
-            return c.velocityAt(t);
+            return c->velocityAt(t);
         }
     }
     // distance over path length!
