@@ -41,13 +41,11 @@
 
 #include <QtGui>
 
+#include "dpi.h"
 #include "bezierpath.h"
 #include "renderarea.h"
 
 using namespace std;
-
-#define DPI 90
-#define MM2INCH 0.0393701
 
 RenderArea::RenderArea(QWidget *parent)
     : QWidget(parent)
@@ -124,31 +122,31 @@ void RenderArea::setAntialiased(bool antialiased)
 
 void RenderArea::drawGrid(QPainter& painter) {
 
-    const int MIN_X = -1000;
-    const int MIN_Y = -1000;
-    const int MAX_X = 5000;
-    const int MAX_Y = 5000;
-    const int GRID_SIZE = 100;
+    const int MIN_X = (int) MM2PX(-500); // in mm
+    const int MIN_Y = (int) MM2PX(-500); // in mm
+    const int MAX_X = (int) MM2PX(2500); //in mm
+    const int MAX_Y = (int) MM2PX(2500); // in mm
+    const int GRID_SIZE = (int) MM2PX(50); // in mm
 
     painter.save();
 
     // draw A4 paper sheet
     painter.setRenderHint(QPainter::Antialiasing, false);
 
-    painter.fillRect(QRectF(0, 0, 210 * MM2INCH * DPI, 297 * MM2INCH * DPI), QColor::fromRgbF(1.,1.,1.));
+    painter.fillRect(QRectF(0, 0, MM2PX(210), MM2PX(297)), QColor::fromRgbF(1.,1.,1.));
 
     painter.setPen(QPen(QColor::fromRgbF(0.,0.,0.,0.2)));
 
     painter.setRenderHint(QPainter::Antialiasing, true);
     for (int i = MIN_X ; i < MAX_X ; i += GRID_SIZE) {
             painter.drawLine(i,MIN_Y, i, MAX_Y);
-            painter.drawText(i + 5,-5,QString::number(i));
+            painter.drawText(i + 5,-5,QString::number((int) (PX2MM(i) + 0.5)));
     }
 
 
     for (int j = MIN_Y ; j < MAX_Y ; j += GRID_SIZE) {
             painter.drawLine(MIN_X, j, MAX_X, j);
-            painter.drawText(5,j - 5,QString::number(j));
+            painter.drawText(5,j - 5,QString::number((int) (PX2MM(j) + 0.5)));
     }
 
     painter.restore();

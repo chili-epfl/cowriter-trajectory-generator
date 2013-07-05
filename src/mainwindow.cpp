@@ -3,6 +3,7 @@
 
 #include <QtGui>
 
+#include "dpi.h"
 #include "renderarea.h"
 #include  "trajsampler.h"
 #include "mainwindow.h"
@@ -151,9 +152,14 @@ void MainWindow::on_trajDensity_valueChanged(int value)
 void MainWindow::on_pushButton_clicked()
 {
     auto traj = sampler->sample(density, iterations);
+    cout << endl << "----------------------------------" << endl;
+    cout << "Waypoints" << endl;
+    cout << "(in mm, assuming the svg is at 90dpi)" << endl;
+    cout << "x\ty\tz" << endl;
     for (auto tp : traj) {
-        cout << tp.p.x << "," << tp.p.y << endl;
+        cout << PX2MM(tp.p.x) << "\t" << PX2MM(tp.p.y) << "\t0.0" << endl;
     }
+    cout << endl << "----------------------------------" << endl;
 }
 
 void MainWindow::on_samplingMethod_currentIndexChanged(const QString &method)
