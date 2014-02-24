@@ -37,10 +37,10 @@ bool SvgPathParser::read(QIODevice *device)
     QDomNodeList paths = domDocument.elementsByTagName("path");
     for (uint i = 0; i < paths.length(); i++) {
         QDomElement path = paths.at(i).toElement();
-        cout << "Found path " << path.attribute("id", "no id").toStdString() << endl;
+        cerr << "Found path " << path.attribute("id", "no id").toStdString() << endl;
         pathDesc = path.attribute("d", "").toStdString();
     }
-    cout << "Only last one is kept!!" << endl;
+    cerr << "Only last one is kept!!" << endl;
 
 
     return parsePath(pathDesc);

@@ -19,6 +19,10 @@ void TrajSampler::stopSampling()
 {
     cerr << "Sampling took " << ((float)(clock() - starttime)) / (CLOCKS_PER_SEC * 0.001) << "ms" << endl;
 }
+point TrajSampler::getOrigin()
+{
+    return bpath.origin;
+}
 
 Trajectory BaseSampler::sample(int density, int iterations)
 {
