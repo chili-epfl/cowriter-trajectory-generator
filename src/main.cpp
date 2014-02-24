@@ -98,9 +98,9 @@ int main(int argc, char *argv[])
         }
 
         auto traj = sampler->sample(density, iterations);
-        cout << PX2MM(sampler->getOrigin().x)/1000.0 << "\t" << PX2MM(sampler->getOrigin().y)/1000.0 << endl; // output origin
+        cout << PX2M(sampler->getOrigin().x)<< "\t" << PX2M(sampler->getOrigin().y) << endl; // output origin
         for (auto tp : traj) {
-            cout << PX2MM(tp.p.x)/1000.0 << "\t" << PX2MM(tp.p.y)/1000.0 << "\t0.0" << endl; // output trajectory
+            cout << PX2M(tp.p.x) << "\t" << PX2M(tp.p.y)<< "\t0.0" << endl; // output trajectory
         }
 
         return 0;
