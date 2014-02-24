@@ -22,7 +22,7 @@ public:
     virtual ~TrajSampler() {}
 
     virtual Trajectory sample(int density, int iterations = 1) = 0;
-
+    point getOrigin();
 protected:
     BezierPath bpath;
 

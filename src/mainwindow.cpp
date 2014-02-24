@@ -2,7 +2,8 @@
 #include <algorithm>    // std::max
 
 #include <QtGui>
-
+#include <QFileDialog>
+#include <QMessageBox>
 #include "dpi.h"
 #include "renderarea.h"
 #include  "trajsampler.h"

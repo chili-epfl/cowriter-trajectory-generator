@@ -42,12 +42,68 @@
 
 #include "mainwindow.h"
 
+#include <QString>
+#include <QFile>
+#include <iostream>
+#include "svgpathparser.h"
+#include "trajsampler.h"
+#include "dpi.h"
+
+using namespace std;
+void usage(char* name) {
+    cout << "Usage: " << name << endl;
+    cout << "Run a GUI to display and sample trajectories from an SVG file."<< endl << endl;
+    cout << "Usage: " << name << " <path.svg> density samplerType"<< endl;
+    cout << "Reads the first path from an SVG file and outputs on" << endl;
+    cout << "stdout the corresponding trajectory sampled with " << endl;
+    cout << "'density' points per cm by a sampler of type samplerType: " << endl;
+    cout << "'homogeneous' (uniform) or 'curvature' (sample rate " << endl;
+    cout << "proportional to the curvature of the segment)." << endl;
+}
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
-    MainWindow window;
-    window.show();
-    //window.open();
-    //window.updatePath();
-    return app.exec();
+    if (argc == 1){             // use GUI
+        QApplication app(argc, argv);
+        MainWindow window;
+        window.show();
+        return app.exec();
+    }
+    else{                       // don't use GUI. use cout for output and cerr for log.
+
+        int density = atoi(argv[2]);
+        int iterations = 5;
+        SvgPathParser svgPathParser;
+        TrajSampler* sampler;
+
+        if (argc != 4) {
+            usage(argv[0]);
+            exit(1);
+        }
+
+        if (string(argv[3]) == "curvature"){
+            sampler = new CurvatureSampler();
+        }
+        else if(string(argv[3]) == "homogeneous"){
+            sampler = new HomogeneousSampler();
+        }
+        else{
+            cerr << "Invalid samplerType" << endl;
+            return -1;
+        }
+
+        string fileName = string(argv[1]);
+        QFile file(QString::fromStdString(fileName));
+        if (svgPathParser.read(&file)) {
+            sampler->setPath(svgPathParser.path);
+        }
+
+        auto traj = sampler->sample(density, iterations);
+        cout << PX2MM(sampler->getOrigin().x)/1000.0 << "\t" << PX2MM(sampler->getOrigin().y)/1000.0 << endl; // output origin
+        for (auto tp : traj) {
+            cout << PX2MM(tp.p.x)/1000.0 << "\t" << PX2MM(tp.p.y)/1000.0 << "\t0.0" << endl; // output trajectory
+        }
+
+        return 0;
+    }
+
 }
