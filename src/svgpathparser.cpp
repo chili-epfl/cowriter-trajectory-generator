@@ -10,7 +10,15 @@ class QString;
 
 using namespace std;
 
-SvgPathParser::SvgPathParser(){}
+SvgPathParser::SvgPathParser(){
+    canvasHeight = -1;
+    pointProcessingParams.yOriginAtBottom = false;
+}
+
+SvgPathParser::SvgPathParser(PointProcessingParams pointProcessingParams){
+    this->pointProcessingParams = pointProcessingParams;
+    canvasHeight = -1;
+}
 
 bool SvgPathParser::read(QIODevice *device)
 {
@@ -33,6 +41,9 @@ bool SvgPathParser::read(QIODevice *device)
        cerr << "This file is not an SVG file!" << endl;
         return false;
     }
+    if(pointProcessingParams.yOriginAtBottom){
+        canvasHeight = root.attribute("height","-1").toFloat();
+    }
 
     QDomNodeList paths = domDocument.elementsByTagName("path");
     for (uint i = 0; i < paths.length(); i++) {
@@ -42,6 +53,7 @@ bool SvgPathParser::read(QIODevice *device)
     }
     cerr << "Only last one is kept!!" << endl;
 
+    QDomNodeList svgInfo = domDocument.elementsByTagName("svg");
 
     return parsePath(pathDesc);
 
@@ -76,11 +88,12 @@ bool SvgPathParser::parsePath(std::string &content)
     point prev_point;
     prev_point.x = prev_point.y = 0;
     for (uint i = 0; i < tokens.size() ; i++) {
-        auto tok = tokens[i];
+        auto tok = tokens[i];        
+
         if(tok.size() == 1) {// command
             if (tok.compare("M") == 0 or tok.compare("m") == 0) {
                 currentmode = MOVE;
-                path.origin = splitToken(tokens[i+1]);
+                path.origin = processPoint(splitToken(tokens[i+1]));
                 i++;
             }
             else if (tok.compare("C") == 0) {
@@ -93,6 +106,7 @@ bool SvgPathParser::parsePath(std::string &content)
         }
         else // coordinates
         {
+
             BezierCubicPatch* curve = new BezierCubicPatch();
             point c1, c2, p;
 
@@ -101,9 +115,9 @@ bool SvgPathParser::parsePath(std::string &content)
                     cerr << "Multiple coords after moveTo command not supported" << endl;
                     break;
                 case ABSCUBIC:
-                    c1 = splitToken(tokens[i]);
-                    c2 = splitToken(tokens[i+1]);
-                    p = splitToken(tokens[i+2]);
+                    c1 = processPoint(splitToken(tokens[i]));
+                    c2 = processPoint(splitToken(tokens[i+1]));
+                    p = processPoint(splitToken(tokens[i+2]));
 
                     curve->ox = prev_point.x;
                     curve->oy = prev_point.y;
@@ -120,9 +134,9 @@ bool SvgPathParser::parsePath(std::string &content)
                     break;
 
                 case RELCUBIC:
-                    c1 = splitToken(tokens[i]);
-                    c2 = splitToken(tokens[i+1]);
-                    p = splitToken(tokens[i+2]);
+                    c1 = processPoint(splitToken(tokens[i]));
+                    c2 = processPoint(splitToken(tokens[i+1]));
+                    p = processPoint(splitToken(tokens[i+2]));
 
                     curve->ox = prev_point.x;
                     curve->oy = prev_point.y;
@@ -143,6 +157,20 @@ bool SvgPathParser::parsePath(std::string &content)
     }
 
     return true;
+}
+
+point SvgPathParser::processPoint(point p){
+// do any point processing desired (eg. removing white space or converting canvas origin)
+    if (pointProcessingParams.yOriginAtBottom){
+        //if canvasHeight is specified, use it to convert y-coordinates to be from the bottom of the canvas instead of from the top
+        if(canvasHeight <= 0){
+            cerr << "Invalid canvas height. Cannot process point as requested.";
+            return p;
+        } else {
+            p.y = canvasHeight - p.y;
+        }
+    }
+    return p;
 }
 
 point SvgPathParser::splitToken(std::string &tok)

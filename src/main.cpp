@@ -58,7 +58,9 @@ void usage(char* name) {
     cout << "stdout the corresponding trajectory sampled with " << endl;
     cout << "'density' points per cm by a sampler of type samplerType: " << endl;
     cout << "'homogeneous' (uniform) or 'curvature' (sample rate " << endl;
-    cout << "proportional to the curvature of the segment)." << endl;
+    cout << "proportional to the curvature of the segment). If 'yflip' is " << endl;
+    cout << "specified as an argument, the origin of the trajectory will be " << endl;
+    cout << "at the bottom-left instead of top-left (default)." << endl;
 }
 int main(int argc, char *argv[])
 {
@@ -72,10 +74,12 @@ int main(int argc, char *argv[])
 
         int density = atoi(argv[2]);
         int iterations = 5;
-        SvgPathParser svgPathParser;
+
+        PointProcessingParams pointProcessingParams; //use y origin at bottom left
+        pointProcessingParams.yOriginAtBottom = false;
         TrajSampler* sampler;
 
-        if (argc != 4) {
+        if (!(argc == 4 || argc == 5)) {
             usage(argv[0]);
             exit(1);
         }
@@ -91,6 +95,21 @@ int main(int argc, char *argv[])
             return -1;
         }
 
+        if (argc == 5){
+           if (string(argv[4]) == "yflip"){
+               pointProcessingParams.yOriginAtBottom = true;
+           }
+           else if (string(argv[4]) == "no-yflip"){
+               pointProcessingParams.yOriginAtBottom = false;
+           }
+           else {
+               cerr << "Invalid argument." << endl;
+               return -1;
+           }
+        }
+
+        SvgPathParser svgPathParser(pointProcessingParams);
+
         string fileName = string(argv[1]);
         QFile file(QString::fromStdString(fileName));
         if (svgPathParser.read(&file)) {
@@ -98,6 +117,7 @@ int main(int argc, char *argv[])
         }
 
         auto traj = sampler->sample(density, iterations);
+
         cout << PX2M(sampler->getOrigin().x)<< "\t" << PX2M(sampler->getOrigin().y) << endl; // output origin
         for (auto tp : traj) {
             cout << PX2M(tp.p.x) << "\t" << PX2M(tp.p.y)<< "\t0.0" << endl; // output trajectory
